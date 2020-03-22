@@ -7,8 +7,8 @@
         name: "Deconnexion",
 
       mounted() {
-        this.$store.commit('deconnect')
-        this.$router.push('Articles')
+        this.$store.commit('deconnect');
+        this.$router.push('/');
       }
     }
 </script>

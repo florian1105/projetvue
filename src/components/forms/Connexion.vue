@@ -4,7 +4,7 @@
     <div class='container'>
       <form>
         <div class='form-group'>
-          <label for='exampleInputEmail1'>Email address</label>
+          <label for='exampleInputEmail1'>Adresse mail</label>
           <input
             v-model='email'
             type='email'
@@ -14,18 +14,23 @@
           >
         </div>
         <div class='form-group'>
-          <label for='exampleFormControlTextarea1'>password</label>
+          <label for='exampleFormControlTextarea1'>Mot de passe</label>
           <input v-model='password' type="password" class='form-control' id='exampleFormControlTextarea1' rows='3'/>
         </div>
-        <button class='btn btn-primary' @click='connect($event)'>Connexion</button>
+        <div style='display: flex;justify-content: center;margin-bottom: 1rem'>
+          <button class='btn btn-primary' @click='connect($event)' v-show='!formSent'>Connexion</button>
+          <Circle2 v-show='formSent' style='justify-content: center;'/>
+        </div>
+        <router-link to="/creationCompte">pas de compte ? Inscrivez-vous ! </router-link>
       </form>
     </div>
+    <FlashMessage/>
   </div>
 </template>
 
 <script>
   import axios from "axios";
-
+  import {Circle2} from 'vue-loading-spinner';
   export default {
     name: 'Connexion',
     data () {
@@ -35,25 +40,42 @@
         formSent: false
       }
     },
+    components : {
+      Circle2,
+    },
     methods: {
       connect: function (event) {
-        event.preventDefault()
-        console.log(this.email)
-        console.log(this.password)
-        axios
-          .post('https://projetnodevue.herokuapp.com/login',{email:this.email,password : this.password},{headers: {'Access-Control-Allow-Origin': '*','Accept':'*'}})
-          .then(response => {
-            if(response.data.jwt!=null){
-              this.$store.commit('loadJwt',response.data.jwt)
-              this.$store.commit('loadUser',this.email)
-              console.log(this.$store.state.jwt)
-              this.$router.push('mesArticles')
+        if(!this.formSent) {
+          event.preventDefault();
+          this.formSent = true;
+          console.log(this.email);
+          console.log(this.password);
+          axios
+            .post('https://projetnodevue.herokuapp.com/login', {
+              email: this.email,
+              password: this.password
+            }, {headers: {'Access-Control-Allow-Origin': '*', 'Accept': '*'}})
+            .then(response => {
+              if (response.data.jwt != null) {
+                this.$store.commit('loadJwt', response.data.jwt);
 
-            }
+                this.$store.commit('loadUser', this.email);
+                console.log(this.$store.state.jwt);
+                axios.get('https://projetnodevue.herokuapp.com/article/auteur/'+this.email).then(res => {
+                  var id = res.data[0]._id;
+                  this.$store.commit('loadAuteurId',id);
+                  this.$router.push('mesArticles');
+                });
+              }
 
-          })
-          .catch(error => console.log(error))
-        this.formSent = true
+            })
+            .catch(error => {
+              console.log(error);
+              this.flashMessage.show({status: 'error', title: 'Connexion refusée', message: 'Identifiant ou mot de passe faux'});
+              this.formSent = false;
+            });
+
+        }
       }
     }
   }

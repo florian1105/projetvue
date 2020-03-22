@@ -4,7 +4,8 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import Vuex from 'vuex'
-
+import FlashMessage from '@smartweb/vue-flash-message'
+Vue.use(FlashMessage)
 Vue.config.productionTip = false
 Vue.use(Vuex)
 
@@ -14,6 +15,7 @@ const store = new Vuex.Store({
     jwt : null,
     user : null,
     articlesliste : null,
+    auteurid : null,
   },
   mutations: {
     loadJwt (state, jwt) {
@@ -21,6 +23,9 @@ const store = new Vuex.Store({
     },
     loadUser (state, user){
       state.user=user
+    },
+    loadAuteurId (state, id){
+      state.auteurid=id
     },
     deconnect (state){
       state.user=null
@@ -33,9 +38,23 @@ const store = new Vuex.Store({
       var index = state.articlesliste.findIndex(function(item, i){
         return item.id === id
       });
-      state.articlesliste = state.articlesliste.splice(index,1)
+      state.articlesliste.splice(index,1)
+
+    },
+    updateArticle (state,articleModif){
+      var index = state.articlesliste.findIndex(function(item, i){
+        return item.id === articleModif.id
+      });
+      var article =  state.articlesliste[index]
+      article.nom = articleModif.nom
+      article.contenu=articleModif.contenu
+      state.articlesliste.splice(index,1,article)
+    },
+    addArticle (state,article){
+       state.articlesliste.unshift(article);
 
     }
+
   }
 })
 
