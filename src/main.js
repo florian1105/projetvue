@@ -9,7 +9,7 @@ Vue.use(FlashMessage)
 Vue.config.productionTip = false
 Vue.use(Vuex)
 
-
+// Your branch is ahead of 'origin/master' by 1 commit.
 const store = new Vuex.Store({
   state: {
     jwt : null,
